@@ -1,0 +1,15 @@
+{
+    "configurations": [
+        {
+          "type": "go",
+          "name": "run cmd",
+          "mode": "debug",
+          "environment": {
+
+          }, // optional
+          "dependsOn": [], // optional
+          "goExecPath": "/usr/local/go/bin/go",
+          "params": ["run", "cmd/backup/main.go", "--config=config.yaml"],
+        }
+    ]
+}

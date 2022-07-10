@@ -1,0 +1,11 @@
+drivers:
+    s3:
+        default:
+            access_key: jwCukHoJg4429WiJxoyKhS
+            secret_key: ggruvZbAR3qXdrXt7JUB8UnUHCQ1z9xHDMTjB3KaVtf7
+            bucket: test-bucket
+            url: ib.bizmrg.com
+            region: ru-msk
+    dir:
+        default:
+            path: new/dir

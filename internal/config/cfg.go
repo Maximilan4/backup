@@ -13,22 +13,26 @@ type (
 		Drivers *Drivers `mapstructure:"drivers"`
 	}
 	Drivers struct {
-		S3 map[string]*drivers.S3Driver `mapstructure:"s3"`
-		Dir map[string]*drivers.DirectoryDriver `mapstructure:"dir"`
+		S3  map[string]*drivers.S3DriverConfig        `mapstructure:"s3"`
+		Dir map[string]*drivers.DirectoryDriverConfig `mapstructure:"dir"`
 	}
 )
 
 var (
 	DefaultPath string
-	config Config
+	config      Config
 )
 
-func init()  {
+func init() {
 	homePath, err := os.UserHomeDir()
 	if err != nil {
 		logrus.Fatal(err)
 	}
 	DefaultPath = path.Join(homePath, "config.yaml")
+}
+
+func Get() Config {
+	return config
 }
 
 func Load(path string) (err error) {

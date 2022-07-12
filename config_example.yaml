@@ -8,4 +8,4 @@ drivers:
             region: ru-msk
     dir:
         default:
-            path: new/dir
+            output_path: new/dir

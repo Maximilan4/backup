@@ -28,7 +28,7 @@ func init() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	DefaultPath = path.Join(homePath, "config.yaml")
+	DefaultPath = path.Join(homePath, ".backup.yaml")
 }
 
 func Get() Config {

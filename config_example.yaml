@@ -1,11 +1,12 @@
 drivers:
     s3:
         default:
-            access_key: jwCukHoJg4429WiJxoyKhS
-            secret_key: ggruvZbAR3qXdrXt7JUB8UnUHCQ1z9xHDMTjB3KaVtf7
-            bucket: test-bucket
-            url: ib.bizmrg.com
-            region: ru-msk
+            access_key: <access_key_id>
+            secret_key: <secret_key>
+            bucket: <bucket_name>
+            url: <endpoint_url>
+            region: <region>
+            path: <path_on_bucket>
     dir:
         default:
             output_path: new/dir

@@ -1,0 +1,59 @@
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    main: ./cmd/backup
+archives:
+  - replacements:
+      darwin: Darwin
+      linux: Linux
+nfpms:
+  -
+    id: backup
+    package_name: backup
+    vendor: Max Maximov
+    maintainer: Max Maximov
+    formats:
+      - rpm
+      - deb
+      - apk
+    bindir: /usr/bin
+    version_metadata: git
+    license: MIT
+    replacements:
+      amd64: 64-bit
+      darwin: macOS
+    overrides:
+      rpm:
+        replacements:
+          amd64: x86_64
+        file_name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Arch }}"
+      deb:
+        replacements:
+          amd64: x86_64
+        file_name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Arch }}"
+      apk:
+        replacements:
+          amd64: x86_64
+        file_name_template: "{{ .ProjectName }}-v{{ .Version }}-{{ .Arch }}"
+    contents:
+      - src: config_example.yaml
+        dst: /etc/backup/config.yaml
+        type: "config|noreplace"
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+

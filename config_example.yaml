@@ -1,0 +1,12 @@
+drivers:
+    s3:
+        default:
+            access_key: <access_key_id>
+            secret_key: <secret_key>
+            bucket: <bucket_name>
+            url: <endpoint_url>
+            region: <region>
+            path: <path_on_bucket>
+    dir:
+        default:
+            output_path: /tmp/backup

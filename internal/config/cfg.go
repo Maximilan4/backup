@@ -2,10 +2,7 @@ package config
 
 import (
 	"backup/internal/drivers"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"os"
-	"path"
 )
 
 type (
@@ -19,17 +16,9 @@ type (
 )
 
 var (
-	DefaultPath string
+	DefaultPath = "/etc/backup/config.yaml"
 	config      Config
 )
-
-func init() {
-	homePath, err := os.UserHomeDir()
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	DefaultPath = path.Join(homePath, ".backup.yaml")
-}
 
 func Get() Config {
 	return config

@@ -9,4 +9,4 @@ drivers:
             path: <path_on_bucket>
     dir:
         default:
-            output_path: new/dir
+            output_path: /tmp/backup

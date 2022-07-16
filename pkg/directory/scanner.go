@@ -23,7 +23,7 @@ func NewFileScanner(dir string, excludes ...string) *FileScanner {
 	return &FileScanner{dir, excludes}
 }
 
-func (fi *FileInfo) File() (*os.File, error) {
+func (fi *FileInfo) OpenFile() (*os.File, error) {
 	return os.Open(fi.FullPath)
 }
 

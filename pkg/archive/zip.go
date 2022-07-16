@@ -16,7 +16,7 @@ func (za *ZipArchive) Close() error {
 	return za.Writer.Close()
 }
 
-func (za *ZipArchive) Add(info *directory.FileInfo) error {
+func (za *ZipArchive) Write(info *directory.FileInfo) error {
 	file, err := info.File()
 	if err != nil {
 		return err
@@ -43,6 +43,6 @@ func (za *ZipArchive) Add(info *directory.FileInfo) error {
 	return nil
 }
 
-func NewZipArchive(writer io.Writer) *ZipArchive {
+func NewZipWriter(writer io.Writer) *ZipArchive {
 	return &ZipArchive{Writer: zip.NewWriter(writer)}
 }

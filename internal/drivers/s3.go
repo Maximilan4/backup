@@ -100,7 +100,7 @@ func (s3d *S3Driver) Backup(ctx context.Context, dir string, archiveType archive
 			}
 		}()
 
-		dirArchive, err := archive.NewArchive(writer, archiveType)
+		dirArchive, err := archive.NewWriter(writer, archiveType)
 		if err != nil {
 			return err
 		}

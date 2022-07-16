@@ -59,7 +59,7 @@ func (dd *DirectoryDriver) Backup(ctx context.Context, dir string, archiveType a
 		}
 	}()
 
-	dirArchive, err := archive.NewArchive(file, archiveType)
+	dirArchive, err := archive.NewWriter(file, archiveType)
 	if err != nil {
 		return err
 	}

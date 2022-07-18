@@ -59,17 +59,16 @@ func (dd *DirectoryDriver) Backup(ctx context.Context, dir string, archiveType a
 		}
 	}()
 
-	dirArchive, err := archive.NewWriter(file, archiveType)
+	archiveWriter, err := archive.NewWriter(file, archiveType)
 	if err != nil {
 		return err
 	}
 
-	archiver := archive.NewArchiver(dirArchive, directory.NewFileScanner(dir))
 	defer func() {
-		if err = dirArchive.Close(); err != nil {
+		if err = archiveWriter.Close(); err != nil {
 			logrus.Fatal(err)
 		}
 	}()
 
-	return archiver.Create(ctx)
+	return archive.Directory(ctx, archiveWriter, directory.NewFileScanner(dir))
 }

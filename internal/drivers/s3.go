@@ -100,22 +100,18 @@ func (s3d *S3Driver) Backup(ctx context.Context, dir string, archiveType archive
 			}
 		}()
 
-		dirArchive, err := archive.NewWriter(writer, archiveType)
+		archiveWriter, err := archive.NewWriter(writer, archiveType)
 		if err != nil {
 			return err
 		}
 
 		defer func() {
-			if err = dirArchive.Close(); err != nil {
+			if err = archiveWriter.Close(); err != nil {
 				logrus.Fatal(err)
 			}
 		}()
-		archiver := archive.NewArchiver(dirArchive, directory.NewFileScanner(dir))
-		if err = archiver.Create(gCtx); err != nil {
-			return err
-		}
-		logrus.Infof("directory %s archived", dir)
-		return nil
+		
+		return archive.Directory(gCtx, archiveWriter, directory.NewFileScanner(dir))
 	})
 
 	name := s3d.GetFilename(archiveType)

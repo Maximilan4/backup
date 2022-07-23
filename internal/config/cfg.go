@@ -1,17 +1,13 @@
 package config
 
 import (
-	"backup/internal/drivers"
 	"github.com/spf13/viper"
 )
 
 type (
 	Config struct {
-		Drivers *Drivers `mapstructure:"drivers"`
-	}
-	Drivers struct {
-		S3  map[string]*drivers.S3DriverConfig        `mapstructure:"s3"`
-		Dir map[string]*drivers.DirectoryDriverConfig `mapstructure:"dir"`
+		Drivers *Drivers  `mapstructure:"drivers"`
+		Jobs    []*JobCfg `mapstructure:"jobs"`
 	}
 )
 

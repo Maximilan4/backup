@@ -7,17 +7,17 @@ import (
 )
 
 type (
-	ZipArchive struct {
+	ZipWriter struct {
 		Writer *zip.Writer
 	}
 )
 
-func (za *ZipArchive) Close() error {
-	return za.Writer.Close()
+func (zw *ZipWriter) Close() error {
+	return zw.Writer.Close()
 }
 
-func (za *ZipArchive) Write(info *directory.FileInfo) error {
-	file, err := info.File()
+func (zw *ZipWriter) Write(info *directory.FileInfo) error {
+	file, err := info.OpenFile()
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (za *ZipArchive) Write(info *directory.FileInfo) error {
 
 	header.Method = zip.Deflate
 	header.Name = info.RelativePath
-	archiveFile, err := za.Writer.CreateHeader(header)
+	archiveFile, err := zw.Writer.CreateHeader(header)
 	if err != nil {
 		return err
 	}
@@ -43,6 +43,6 @@ func (za *ZipArchive) Write(info *directory.FileInfo) error {
 	return nil
 }
 
-func NewZipWriter(writer io.Writer) *ZipArchive {
-	return &ZipArchive{Writer: zip.NewWriter(writer)}
+func NewZipWriter(writer io.Writer) *ZipWriter {
+	return &ZipWriter{Writer: zip.NewWriter(writer)}
 }

@@ -2,7 +2,7 @@ package archive
 
 import (
 	"archive/zip"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"io"
 )
 
@@ -16,7 +16,7 @@ func (zw *ZipWriter) Close() error {
 	return zw.Writer.Close()
 }
 
-func (zw *ZipWriter) Write(info *directory.FileInfo) error {
+func (zw *ZipWriter) Write(info *filesystem.FileInfo) error {
 	file, err := info.OpenFile()
 	if err != nil {
 		return err

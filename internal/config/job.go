@@ -9,7 +9,7 @@ import (
 type (
 	JobCfg struct {
 		Title         string        `yaml:"name" mapstructure:"name"`
-		Directory     string        `yaml:"target" mapstructure:"target"`
+		TargetPath    string        `yaml:"target" mapstructure:"target"`
 		DriverInfo    string        `yaml:"driver" mapstructure:"driver"`
 		CronSchedule  string        `yaml:"schedule" mapstructure:"schedule"`
 		Archive       string        `yaml:"archive" mapstructure:"archive"`
@@ -22,7 +22,7 @@ func (t *JobCfg) Name() string {
 }
 
 func (t *JobCfg) Target() string {
-	return t.Directory
+	return t.TargetPath
 }
 
 func (t *JobCfg) Driver() (drivers.DriverInfo, error) {

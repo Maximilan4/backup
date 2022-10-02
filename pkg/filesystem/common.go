@@ -1,4 +1,4 @@
-package directory
+package filesystem
 
 import (
 	"os"
@@ -7,11 +7,11 @@ import (
 
 type (
 	Scanner interface {
-		Scan() ([]*FileInfo, error)
+		Scan() chan *FileInfo
 	}
 )
 
-func Normalize(dir string) (newPath string, err error) {
+func NormalizePath(dir string) (newPath string, err error) {
 	if dir[0] == '~' {
 		var homeDir string
 		homeDir, err = os.UserHomeDir()

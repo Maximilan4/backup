@@ -19,10 +19,10 @@ type (
 func Load(driverType string, cfg any) (Driver, error) {
 	var driver Driver
 	switch driverType {
-	case DirectoryType:
-		driver = NewDirectoryDriver(*cfg.(*DirectoryDriverConfig))
+	case FS:
+		driver = NewDirectoryDriver(*cfg.(*FsDriverConfig))
 
-	case S3Type:
+	case S3:
 		driver = NewS3Driver(*cfg.(*S3DriverConfig))
 
 	default:

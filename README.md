@@ -2,19 +2,17 @@
 Tool for creation backups.
 
 ## usage
-* create `.backup.yaml` at user`s home dir with next content
+* create `.backup.yaml` (by default config must store at /etc/backup/config.yaml) with next content:
 ```yaml
 #drivers section, describes possible storages of backup`s archives
 drivers:
     s3: # s3 like storages configurations
         default: # name of configuration 
-            access_key: <access_key_id>
-            secret_key: <secret_key>
-            bucket: <bucket_name>
-            url: <endpoint_url>
-            region: <region>
-            path: <path_on_bucket>
-    dir: # just store archives in a directory
+          profile: <aws_shared_profile_name>
+          bucket: <bucket_name>
+          url: <endpoint_url>
+          path: <path_on_bucket>
+    fs: # just store archives in a directory
         default:
             output_path: new/dir
 ```
@@ -30,4 +28,22 @@ go build -o backup cmd/backup/main.go
 # and use it in args in following format: <driver_type>.<driver_name>
 # archive type is optional, one of zip,tar,tgz, first is default
 ./backup ~/my/dir s3 tgz --config=my_cfg.yaml
+```
+
+## schedule
+For scheduling used [cron](https://github.com/robfig/cron) library.
+You must add to config root jobs section in following format:
+```yaml
+jobs:
+    - name: "Documents" # job to upload a directory
+      target: "~/Documents" #target path
+      driver: s3.default #driver name
+      schedule: "@every 1m" #see format of intervals in lib above
+      archive: tgz #archive type
+      timeout: 5m #timeout
+```
+After it, run one of commands:
+```bash
+./backup jobs #prints out jobs section
+./backup schedule start # starts a schedule process
 ```

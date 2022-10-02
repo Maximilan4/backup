@@ -5,7 +5,7 @@ import (
 	"backup/internal/drivers"
 	"backup/internal/jobs"
 	"backup/pkg/archive"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"context"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -45,7 +45,7 @@ func loadConfig() {
 
 func backup(cmd *cobra.Command, args []string) (err error) {
 	cfg := config.Get()
-	path, err := directory.Normalize(args[0])
+	path, err := filesystem.NormalizePath(args[0])
 	if err != nil {
 		return
 	}

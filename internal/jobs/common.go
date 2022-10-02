@@ -3,7 +3,7 @@ package jobs
 import (
 	"backup/internal/drivers"
 	"backup/pkg/archive"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"context"
 	"github.com/sirupsen/logrus"
 	"time"
@@ -36,7 +36,7 @@ func (j *Job[C, D]) Run() {
 		"archiveType": j.cfg.ArchiveType(),
 	}).Info("running a task")
 
-	path, err := directory.Normalize(j.cfg.Target())
+	path, err := filesystem.NormalizePath(j.cfg.Target())
 	if err != nil {
 		logrus.Fatal(err)
 	}

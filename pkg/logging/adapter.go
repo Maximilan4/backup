@@ -13,9 +13,21 @@ func NewCronAdapter() *CronAdapter {
 }
 
 func (c *CronAdapter) Info(msg string, keysAndValues ...interface{}) {
-	c.logger.WithField("info", keysAndValues).Info(msg)
+	c.getEntry(keysAndValues).Info(msg)
 }
 
 func (c *CronAdapter) Error(err error, msg string, keysAndValues ...interface{}) {
-	c.logger.WithField("info", keysAndValues).WithField("msg", msg).Error(err)
+	c.getEntry(keysAndValues).WithField("msg", msg).Error(err)
+}
+
+func (c *CronAdapter) getEntry(keysAndValues []any) *logrus.Entry {
+	entry := logrus.NewEntry(c.logger)
+	for pos := 0; pos < len(keysAndValues); pos = pos + 2 {
+		if pos%2 != 0 || pos == len(keysAndValues) {
+			continue
+		}
+		entry = entry.WithField(keysAndValues[pos].(string), keysAndValues[pos+1])
+	}
+
+	return entry
 }

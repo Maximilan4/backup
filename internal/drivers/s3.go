@@ -2,7 +2,7 @@ package drivers
 
 import (
 	"backup/pkg/archive"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	S3Type = "s3"
+	S3 = "s3"
 )
 
 type (
@@ -105,7 +105,7 @@ func (s3d *S3Driver) Backup(ctx context.Context, dir string, archiveType archive
 			}
 		}()
 
-		return archive.Directory(gCtx, archiveWriter, directory.NewFileScanner(dir))
+		return archive.FS(gCtx, archiveWriter, filesystem.NewFileScanner(dir))
 	})
 
 	name := s3d.GetFilename(archiveType)

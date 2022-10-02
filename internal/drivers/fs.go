@@ -2,7 +2,7 @@ package drivers
 
 import (
 	"backup/pkg/archive"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
@@ -12,27 +12,27 @@ import (
 )
 
 const (
-	DirectoryType = "dir"
+	FS = "fs"
 )
 
 type (
-	DirectoryDriver struct {
-		cfg DirectoryDriverConfig
+	FileSystemDriver struct {
+		cfg FsDriverConfig
 	}
-	DirectoryDriverConfig struct {
+	FsDriverConfig struct {
 		OutputPath string `mapstructure:"output_path"`
 	}
 )
 
-func NewDirectoryDriver(cfg DirectoryDriverConfig) *DirectoryDriver {
-	return &DirectoryDriver{cfg: cfg}
+func NewDirectoryDriver(cfg FsDriverConfig) *FileSystemDriver {
+	return &FileSystemDriver{cfg: cfg}
 }
 
-func (dd *DirectoryDriver) createOutputDir() error {
+func (dd *FileSystemDriver) createOutputDir() error {
 	return os.MkdirAll(dd.cfg.OutputPath, 0700)
 }
 
-func (dd *DirectoryDriver) createFile(archiveType archive.Type) (*os.File, error) {
+func (dd *FileSystemDriver) createFile(archiveType archive.Type) (*os.File, error) {
 	if err := dd.createOutputDir(); err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (dd *DirectoryDriver) createFile(archiveType archive.Type) (*os.File, error
 	return os.Create(path.Join(dd.cfg.OutputPath, filename))
 }
 
-func (dd *DirectoryDriver) Backup(ctx context.Context, dir string, archiveType archive.Type) error {
+func (dd *FileSystemDriver) Backup(ctx context.Context, dir string, archiveType archive.Type) error {
 	file, err := dd.createFile(archiveType)
 	if err != nil {
 		return err
@@ -70,5 +70,5 @@ func (dd *DirectoryDriver) Backup(ctx context.Context, dir string, archiveType a
 		}
 	}()
 
-	return archive.Directory(ctx, archiveWriter, directory.NewFileScanner(dir))
+	return archive.FS(ctx, archiveWriter, filesystem.NewFileScanner(dir))
 }

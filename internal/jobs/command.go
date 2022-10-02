@@ -81,21 +81,19 @@ func runScheduleStartCmd(cmd *cobra.Command, args []string) (err error) {
 		if err != nil {
 			return
 		}
+
 		logrus.Infof("Added job %d", entryID)
 	}
 
 	ctx := cmd.Context()
 	ctxCh := ctx.Done()
-	for {
-		select {
-		case <- ctxCh:
-			schedule.Stop()
-			return ctx.Err()
-		default:
-			go func() {
-				schedule.Start()
-			}()
-		}
+	schedule.Start()
+	select {
+	case <-ctxCh:
+		scheduleCtx := schedule.Stop()
+		logrus.Info("Schedule stopped. Waiting for all task done")
+		<-scheduleCtx.Done()
+		return ctx.Err()
 	}
 }
 

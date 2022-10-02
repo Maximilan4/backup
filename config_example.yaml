@@ -1,12 +1,25 @@
 drivers:
     s3:
         default:
-            access_key: <access_key_id>
-            secret_key: <secret_key>
+            profile: <aws_shared_profile_name>
             bucket: <bucket_name>
             url: <endpoint_url>
-            region: <region>
             path: <path_on_bucket>
-    dir:
+    fs:
         default:
             output_path: /tmp/backup
+
+jobs:
+    - name: "Documents" #job to upload a directory
+      target: "~/Documents"
+      driver: s3.default
+      schedule: "@every 1m"
+      archive: tgz
+      timeout: 5m
+
+    - name: "file" # job to upload a single file
+      target: "~/Documents/single_file.txt"
+      driver: s3.default
+      schedule: "@every 2m"
+      archive: tgz
+      timeout: 5m

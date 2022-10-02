@@ -9,8 +9,8 @@ import (
 
 type (
 	Drivers struct {
-		S3  map[string]*drivers.S3DriverConfig        `mapstructure:"s3"`
-		Dir map[string]*drivers.DirectoryDriverConfig `mapstructure:"dir"`
+		S3 map[string]*drivers.S3DriverConfig `mapstructure:"s3"`
+		Fs map[string]*drivers.FsDriverConfig `mapstructure:"fs"`
 	}
 )
 
@@ -20,7 +20,7 @@ func (d Drivers) Get(info drivers.DriverInfo) (any, error) {
 		return strings.EqualFold(s, info.Type())
 	})
 
-	if fieldValue.IsNil() {
+	if !fieldValue.IsValid() || fieldValue.IsNil() || fieldValue.IsZero() {
 		return nil, fmt.Errorf("unable to find %s driver named configuration: %s", info.Type(), info.Name())
 	}
 

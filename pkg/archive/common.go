@@ -1,7 +1,7 @@
 package archive
 
 import (
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
@@ -17,23 +17,19 @@ const (
 type (
 	Type   string
 	Writer interface {
-		Write(*directory.FileInfo) error
+		Write(*filesystem.FileInfo) error
 		Close() error
 	}
 )
 
-func Directory(ctx context.Context, writer Writer, scanner directory.Scanner) error {
+func FS(ctx context.Context, writer Writer, scanner filesystem.Scanner) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		infos, err := scanner.Scan()
-		if err != nil {
-			return err
-		}
-
 		entry := logrus.NewEntry(logrus.StandardLogger())
-		for _, info := range infos {
+		var err error
+		for info := range scanner.Scan() {
 			err = writer.Write(info)
 			if err != nil {
 				return err

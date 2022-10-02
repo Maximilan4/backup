@@ -2,8 +2,9 @@ package archive
 
 import (
 	"archive/tar"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"compress/gzip"
+	"github.com/sirupsen/logrus"
 	"io"
 )
 
@@ -28,12 +29,16 @@ func (ta *TarWriter) Close() error {
 	return nil
 }
 
-func (ta *TarWriter) Write(info *directory.FileInfo) error {
+func (ta *TarWriter) Write(info *filesystem.FileInfo) error {
 	file, err := info.OpenFile()
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			logrus.Fatal(err)
+		}
+	}()
 
 	header, err := tar.FileInfoHeader(info, info.RelativePath)
 	if err != nil {

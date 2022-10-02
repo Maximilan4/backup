@@ -18,7 +18,7 @@ var (
 		Short:         "returns list of jobs from cfg",
 		Example:       "returns list of jobs from cfg",
 		Args:          cobra.NoArgs,
-		RunE:          runTasksCmd,
+		RunE:          runTasksListCmd,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
@@ -84,12 +84,22 @@ func runScheduleStartCmd(cmd *cobra.Command, args []string) (err error) {
 		logrus.Infof("Added job %d", entryID)
 	}
 
-	schedule.Start()
-	<-make(chan struct{})
-	return
+	ctx := cmd.Context()
+	ctxCh := ctx.Done()
+	for {
+		select {
+		case <- ctxCh:
+			schedule.Stop()
+			return ctx.Err()
+		default:
+			go func() {
+				schedule.Start()
+			}()
+		}
+	}
 }
 
-func runTasksCmd(cmd *cobra.Command, args []string) (err error) {
+func runTasksListCmd(_ *cobra.Command, _ []string) (err error) {
 	cfg := config.Get()
 
 	encoder := yaml.NewEncoder(os.Stdout)

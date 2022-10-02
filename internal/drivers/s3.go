@@ -25,21 +25,12 @@ type (
 		cfg S3DriverConfig
 	}
 	S3DriverConfig struct {
-		AccessKey string `mapstructure:"access_key"`
-		SecretKey string `mapstructure:"secret_key"`
-		Bucket    string `mapstructure:"bucket"`
-		Url       string `mapstructure:"url"`
-		Region    string `mapstructure:"region"`
-		Path      string `mapstructure:"path"`
+		Profile string `mapstructure:"profile"`
+		Bucket  string `mapstructure:"bucket"`
+		Url     string `mapstructure:"url"`
+		Path    string `mapstructure:"path"`
 	}
 )
-
-func (s3dc S3DriverConfig) Retrieve(ctx context.Context) (aws.Credentials, error) {
-	return aws.Credentials{
-		AccessKeyID:     s3dc.AccessKey,
-		SecretAccessKey: s3dc.SecretKey,
-	}, nil
-}
 
 func NewS3Driver(cfg S3DriverConfig) *S3Driver {
 	return &S3Driver{cfg: cfg}
@@ -50,16 +41,19 @@ func (s3d *S3Driver) ConfigureClient(ctx context.Context) (*s3.Client, error) {
 		return aws.Endpoint{
 			PartitionID:       "aws",
 			URL:               s3d.cfg.Url,
-			SigningRegion:     s3d.cfg.Region,
+			SigningRegion:     region,
 			Source:            aws.EndpointSourceCustom,
 			HostnameImmutable: false,
 		}, nil
 	})
-	cfg, err := config.LoadDefaultConfig(
-		ctx,
-		config.WithCredentialsProvider(s3d.cfg),
-		config.WithEndpointResolverWithOptions(customResolver),
-	)
+
+	optionsFuncs := make([]func(options *config.LoadOptions) error, 0, 2)
+	optionsFuncs = append(optionsFuncs, config.WithSharedConfigProfile(s3d.cfg.Profile))
+	if s3d.cfg.Url != "" {
+		optionsFuncs = append(optionsFuncs, config.WithEndpointResolverWithOptions(customResolver))
+	}
+
+	cfg, err := config.LoadDefaultConfig(ctx, optionsFuncs...)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +104,7 @@ func (s3d *S3Driver) Backup(ctx context.Context, dir string, archiveType archive
 				logrus.Fatal(err)
 			}
 		}()
-		
+
 		return archive.Directory(gCtx, archiveWriter, directory.NewFileScanner(dir))
 	})
 

@@ -1,7 +1,7 @@
 drivers:
     s3:
         default:
-            profile: <aws_shared_profile_name>
+            profile: default
             bucket: <bucket_name>
             url: <endpoint_url>
             path: <path_on_bucket>
@@ -9,17 +9,4 @@ drivers:
         default:
             output_path: /tmp/backup
 
-jobs:
-    - name: "Documents" #job to upload a directory
-      target: "~/Documents"
-      driver: s3.default
-      schedule: "@every 1m"
-      archive: tgz
-      timeout: 5m
-
-    - name: "file" # job to upload a single file
-      target: "~/Documents/single_file.txt"
-      driver: s3.default
-      schedule: "@every 2m"
-      archive: tgz
-      timeout: 5m
+jobs: []

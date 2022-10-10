@@ -2,19 +2,20 @@ package archive
 
 import (
 	"archive/tar"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"compress/gzip"
+	"github.com/sirupsen/logrus"
 	"io"
 )
 
 type (
-	TarArchive struct {
+	TarWriter struct {
 		Writer   *tar.Writer
 		gzWriter *gzip.Writer
 	}
 )
 
-func (ta *TarArchive) Close() error {
+func (ta *TarWriter) Close() error {
 	if err := ta.Writer.Close(); err != nil {
 		return err
 	}
@@ -28,12 +29,16 @@ func (ta *TarArchive) Close() error {
 	return nil
 }
 
-func (ta *TarArchive) Add(info *directory.FileInfo) error {
-	file, err := info.File()
+func (ta *TarWriter) Write(info *filesystem.FileInfo) error {
+	file, err := info.OpenFile()
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func() {
+		if err := file.Close(); err != nil {
+			logrus.Fatal(err)
+		}
+	}()
 
 	header, err := tar.FileInfoHeader(info, info.RelativePath)
 	if err != nil {
@@ -53,15 +58,15 @@ func (ta *TarArchive) Add(info *directory.FileInfo) error {
 	return nil
 }
 
-func NewTarArchive(writer io.Writer) *TarArchive {
-	return &TarArchive{Writer: tar.NewWriter(writer)}
+func NewTarWriter(writer io.Writer) *TarWriter {
+	return &TarWriter{Writer: tar.NewWriter(writer)}
 }
 
-func NewTarGzArchive(writer io.Writer) (*TarArchive, error) {
+func NewTarGzWriter(writer io.Writer) (*TarWriter, error) {
 	gz, err := gzip.NewWriterLevel(writer, gzip.BestCompression)
 	if err != nil {
 		return nil, err
 	}
 
-	return &TarArchive{Writer: tar.NewWriter(gz), gzWriter: gz}, nil
+	return &TarWriter{Writer: tar.NewWriter(gz), gzWriter: gz}, nil
 }

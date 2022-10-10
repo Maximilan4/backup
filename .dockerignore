@@ -1,0 +1,8 @@
+.gitignore
+.goreleaser.yaml
+LICENSE
+README.md
+SECURITY.md
+.github
+.idea
+.fleet

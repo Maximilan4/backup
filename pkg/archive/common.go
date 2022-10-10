@@ -1,13 +1,11 @@
 package archive
 
 import (
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/sync/errgroup"
 	"io"
-	"sync"
 )
 
 const (
@@ -17,79 +15,46 @@ const (
 )
 
 type (
-	Type    string
-	Archive interface {
-		Add(*directory.FileInfo) error
+	Type   string
+	Writer interface {
+		Write(*filesystem.FileInfo) error
 		Close() error
-	}
-	Archiver struct {
-		Archive Archive
-		scanner directory.Scanner
-		mut     *sync.Mutex
 	}
 )
 
-func (za *Archiver) Create(ctx context.Context) (err error) {
-	files, err := za.scanner.Scan()
-	if err != nil {
-		return err
-	}
-
-	err = za.addFiles(ctx, files)
-
-	return
-}
-
-func (za *Archiver) addFiles(ctx context.Context, files []*directory.FileInfo) error {
-	group, groupCtx := errgroup.WithContext(ctx)
-
-	for _, file := range files {
-		fileInfo := file
-		group.Go(func() error {
-			return za.addFile(groupCtx, fileInfo)
-		})
-	}
-
-	if err := group.Wait(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (za *Archiver) addFile(ctx context.Context, info *directory.FileInfo) error {
+func FS(ctx context.Context, writer Writer, scanner filesystem.Scanner) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		za.mut.Lock()
-		defer za.mut.Unlock()
+		entry := logrus.NewEntry(logrus.StandardLogger())
+		var err error
+		for info := range scanner.Scan() {
+			err = writer.Write(info)
+			if err != nil {
+				return err
+			}
 
-		logrus.Infof("archiving file: %s", info.FullPath)
-		err := za.Archive.Add(info)
-		if err != nil {
-			return err
+			entry.WithFields(logrus.Fields{
+				"path":    info.FullPath,
+				"size":    info.Size(),
+				"mode":    info.Mode(),
+				"modTime": info.ModTime(),
+			}).Info("file was added to archive")
 		}
 	}
+
 	return nil
 }
 
-func NewArchiver(archive Archive, scanner directory.Scanner) *Archiver {
-	return &Archiver{
-		Archive: archive,
-		scanner: scanner,
-		mut:     &sync.Mutex{},
-	}
-}
-
-func NewArchive(writer io.Writer, archiveType Type) (archive Archive, err error) {
+func NewWriter(writer io.Writer, archiveType Type) (archive Writer, err error) {
 	switch archiveType {
 	case TypeZip:
-		archive = NewZipArchive(writer)
+		archive = NewZipWriter(writer)
 	case TypeTar:
-		archive = NewTarArchive(writer)
+		archive = NewTarWriter(writer)
 	case TypeTarGz:
-		archive, err = NewTarGzArchive(writer)
+		archive, err = NewTarGzWriter(writer)
 		if err != nil {
 			return nil, err
 		}

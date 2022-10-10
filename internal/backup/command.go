@@ -3,14 +3,12 @@ package backup
 import (
 	"backup/internal/config"
 	"backup/internal/drivers"
+	"backup/internal/jobs"
 	"backup/pkg/archive"
-	"backup/pkg/directory"
+	"backup/pkg/filesystem"
 	"context"
-	"errors"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 const (
@@ -21,8 +19,8 @@ var (
 	cmd = &cobra.Command{
 		Use:           "backup",
 		Short:         "backups single dir",
-		Example:       "backup this/dir s3",
-		ValidArgs:     []string{"path", "driver"},
+		Example:       "backup this/dir s3 tgz",
+		ValidArgs:     []string{"path", "driver", "archive-type"},
 		Args:          cobra.MinimumNArgs(2),
 		RunE:          backup,
 		SilenceErrors: true,
@@ -34,6 +32,8 @@ var (
 func init() {
 	cobra.OnInitialize(loadConfig)
 	cmd.PersistentFlags().StringVarP(&configPath, "config", "c", config.DefaultPath, "--config=config.yaml")
+
+	cmd.AddCommand(jobs.ListCmd, jobs.ScheduleCmd)
 }
 
 func loadConfig() {
@@ -44,24 +44,23 @@ func loadConfig() {
 }
 
 func backup(cmd *cobra.Command, args []string) (err error) {
-	path, err := directory.Normalize(args[0])
+	cfg := config.Get()
+	path, err := filesystem.NormalizePath(args[0])
 	if err != nil {
 		return
 	}
 
-	driverInfo := strings.Split(args[1], ".")
-	var driverName string
-	switch {
-	case len(driverInfo) == 0:
-		err = errors.New("empty driver name not allowed")
+	driverInfo, err := drivers.NewDriverInfo(args[1])
+	if err != nil {
 		return
-	case len(driverInfo) == 1 || driverInfo[1] == "":
-		driverName = "default"
-	default:
-		driverName = driverInfo[1]
 	}
 
-	driver, err := loadDriver(driverInfo[0], driverName)
+	driverCfg, err := cfg.Drivers.Get(driverInfo)
+	if err != nil {
+		return
+	}
+
+	driver, err := drivers.Load(driverInfo.Type(), driverCfg)
 	if err != nil {
 		return
 	}
@@ -74,29 +73,6 @@ func backup(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	return driver.Backup(cmd.Context(), path, archiveType)
-}
-
-func loadDriver(driverType, driverName string) (drivers.Driver, error) {
-	cfg := config.Get()
-	var driver drivers.Driver
-	switch driverType {
-	case drivers.DirectoryType:
-		if dirCfg, ok := cfg.Drivers.Dir[driverName]; ok && dirCfg != nil {
-			driver = drivers.NewDirectoryDriver(*dirCfg)
-		} else {
-			return nil, fmt.Errorf("unable to find configuration %s for %s driver", driverName, driverType)
-		}
-	case drivers.S3Type:
-		if s3Cfg, ok := cfg.Drivers.S3[driverName]; ok && s3Cfg != nil {
-			driver = drivers.NewS3Driver(*s3Cfg)
-		} else {
-			return nil, fmt.Errorf("unable to find configuration %s for %s driver", driverName, driverType)
-		}
-	default:
-		return nil, fmt.Errorf("unsupported driver given: %s", driverType)
-	}
-
-	return driver, nil
 }
 
 func Run(ctx context.Context) error {

@@ -1,15 +1,24 @@
 {
-    "configurations": [
-        {
-          "type": "go",
-          "name": "run cmd",
-          "mode": "debug",
-          "environment": {
-
-          }, // optional
-          "dependsOn": [], // optional
-          "goExecPath": "/usr/local/go/bin/go",
-          "params": ["run", "cmd/backup/main.go", "--config=config.yaml"],
-        }
-    ]
+  "configurations": [
+    {
+      "type": "go",
+      "name": "single backup",
+      "goExecPath": "/usr/local/go/bin/go",
+      "buildTargets": ["$PROJECT_DIR$/cmd/backup/main.go"]
+    },
+    {
+      "type": "go",
+      "name": "tasks list",
+      "goExecPath": "/usr/local/go/bin/go",
+      "buildTargets": ["$PROJECT_DIR$/cmd/backup/main.go" ],
+      "args": "jobs --config=cfg-test.yaml"
+    },
+    {
+      "type": "go",
+      "name": "schedule start",
+      "goExecPath": "/usr/local/go/bin/go",
+      "buildTargets": ["$PROJECT_DIR$/cmd/backup/main.go"],
+      "args": "schedulestart --config=cfg-test.yaml"
+    }
+  ]
 }

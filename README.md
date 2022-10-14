@@ -47,3 +47,20 @@ After it, run one of commands:
 ./backup jobs #prints out jobs section
 ./backup schedule start # starts a schedule process
 ```
+
+## run in a docker
+```bash
+ docker run --rm --name backup \
+    -v /data/volume:/var/data \ # -volume for data, which we wanna backup
+    -v ~/.aws:/root/.aws  \ # .aws folder, shared profile configuration must be inside a container
+    -v ~/backup-config.yaml:/etc/backup/config.yaml \ # rewrite default config
+    ghcr.io/maximilan4/backup:latest 
+# run a single backup
+docker run --rm --name backup \
+    -v /data/volume:/var/data \ # -volume for data, which we wanna backup
+    -v ~/.aws:/root/.aws  \ # .aws folder, shared profile configuration must be inside a container
+    -v ~/backup-config.yaml:/etc/backup/config.yaml \ # rewrite default config
+    ghcr.io/maximilan4/backup:latest \ #backup binary is an entrypoint
+    /var/data s3 tgz # folder / driver / archive type
+    
+```

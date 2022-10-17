@@ -41,7 +41,7 @@ func (j *Job[C, D]) Run() {
 		logrus.Fatal(err)
 	}
 
-	ctx, done := context.WithTimeout(context.Background(), 5*time.Minute)
+	ctx, done := context.WithTimeout(context.Background(), j.cfg.Timeout())
 	defer done()
 	if err = j.driver.Backup(ctx, path, j.cfg.ArchiveType()); err != nil {
 		logrus.Fatal(err)
